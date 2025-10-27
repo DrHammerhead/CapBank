@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Capacitor Bank Design Calculator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            flex: 1;
+        }
+
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            header p {
+                font-size: 0.95em;
+            }
+        }
+
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        @media (max-width: 768px) {
+            .card {
+                padding: 20px;
+            }
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 1em;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+        }
+
+        .input-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        @media (max-width: 768px) {
+            .input-group {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+
+        button {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1.1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .result-section {
+            background: #f0f4ff;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .result-item:last-child {
+            border-bottom: none;
+        }
+
+        .result-label {
+            color: #555;
+            font-weight: 600;
+        }
+
+        .result-value {
+            color: #667eea;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+
+        .unit {
+            color: #999;
+            font-size: 0.9em;
+            margin-left: 5px;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        @media (max-width: 768px) {
+            .full-width {
+                grid-column: 1;
+            }
+        }
+
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+
+        .info {
+            background: #d1ecf1;
+            border: 1px solid #17a2b8;
+            color: #0c5460;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .success {
+            background: #d4edda;
+            border: 1px solid #28a745;
+            color: #155724;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+
+        .power-triangle {
+            margin-top: 30px;
+            text-align: center;
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .power-triangle canvas {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background: white;
+            display: block;
+            margin: 0 auto;
+        }
+
+        @media (max-width: 768px) {
+            .power-triangle canvas {
+                max-width: 100%;
+                height: auto;
+            }
+        }
+
+        .summary-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .summary-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+
+        .summary-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 5px;
+            text-align: center;
+        }
+
+        .summary-box .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 8px;
+        }
+
+        .summary-box .value {
+            font-size: 1.8em;
+            font-weight: 700;
+        }
+
+        .installation-guide {
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            margin-bottom: 30px;
+        }
+
+        .installation-guide h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .installation-steps {
+            counter-reset: step;
+            list-style: none;
+        }
+
+        .installation-steps li {
+            counter-increment: step;
+            margin-bottom: 15px;
+            display: flex;
+            gap: 15px;
+        }
+
+        .installation-steps li:before {
+            content: counter(step);
+            background: #667eea;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        .step-content {
+            flex: 1;
+        }
+
+        .step-content strong {
+            color: #333;
+        }
+
+        @media (max-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+
+            header h1 {
+                font-size: 1.8em;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .input-group {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .tab-button {
+            background: none;
+            border: none;
+            padding: 10px 20px;
+            cursor: pointer;
+            color: #666;
+            font-weight: 600;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .tab-button:hover {
+            color: #667eea;
+        }
+
+        .tab-button.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: rgba(102, 126, 234, 0.05);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div style="font-size: 1.2em; font-weight: 600; margin-bottom: 15px; opacity: 0.95;">
+                🏢 SCADA AUTOMATION
+            </div>
+            <h1>⚡ Capacitor Bank Designer</h1>
+            <p>Professional Power Factor Correction Calculator for Thailand 230/400V Systems</p>
+        </header>
+
+        <div class="main-grid">
+            <!-- Input Section -->
+            <div class="card">
+                <h2>📋 System Input</h2>
+
+                <div class="warning">
+                    ⚠️ <strong>Important:</strong> This calculator assumes WYE (Y) connection (Thailand standard 230/400V)
+                </div>
+
+                <div class="form-group">
+                    <label for="transformer-kva">Transformer Rating (kVA)</label>
+                    <input type="number" id="transformer-kva" placeholder="e.g., 500" value="500" min="10" max="10000" step="10">
+                </div>
+
+                <div class="form-group">
+                    <label for="system-voltage">System Voltage (V)</label>
+                    <select id="system-voltage">
+                        <option value="400">400V (Thailand Standard - 230/400V WYE)</option>
+                        <option value="220">220V</option>
+                        <option value="230">230V</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="frequency">Frequency (Hz)</label>
+                    <select id="frequency">
+                        <option value="50" selected>50 Hz (Thailand)</option>
+                        <option value="60">60 Hz</option>
+                    </select>
+                </div>
+
+                <div class="tabs" style="margin-bottom: 15px;">
+                    <button class="tab-button active" onclick="switchMethod('method-transformer')" style="padding: 8px 15px; font-size: 0.95em;">Method 1: From Transformer</button>
+                    <button class="tab-button" onclick="switchMethod('method-measured')" style="padding: 8px 15px; font-size: 0.95em;">Method 2: From Measurement</button>
+                </div>
+
+                <div id="method-transformer" class="tab-content active">
+                    <div class="form-group">
+                        <label for="pf-percent">Estimated Loading (% of Transformer)</label>
+                        <input type="number" id="pf-percent" placeholder="e.g., 80" value="80" min="10" max="100" step="5">
+                        <small style="color: #999; display: block; margin-top: 5px;">Calculates: Real Power = Transformer kVA × Loading %</small>
+                    </div>
+                </div>
+
+                <div id="method-measured" class="tab-content">
+                    <div class="form-group">
+                        <label for="real-power-kw">Measured Real Power (kW)</label>
+                        <input type="number" id="real-power-kw" placeholder="e.g., 385" min="0" step="5">
+                        <small style="color: #999; display: block; margin-top: 5px;">Enter actual measured value from power analyzer</small>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="current-pf">Current Power Factor</label>
+                    <input type="number" id="current-pf" placeholder="e.g., 0.80" value="0.80" min="0.50" max="0.99" step="0.01">
+                </div>
+
+                <div class="form-group">
+                    <label for="target-pf">Target Power Factor</label>
+                    <select id="target-pf">
+                        <option value="0.90">0.90 (Thailand minimum)</option>
+                        <option value="0.95">0.95 (Recommended)</option>
+                        <option value="0.99">0.99 (Excellent)</option>
+                    </select>
+                </div>
+
+                <button onclick="calculateCapacitors()">🧮 Calculate Capacitor Bank</button>
+            </div>
+
+            <!-- Results Section -->
+            <div class="card">
+                <h2>📊 Results</h2>
+
+                <div id="error-message" class="error" style="display: none;"></div>
+
+                <div id="results" style="display: none;">
+                    <div class="result-section">
+                        <div class="result-item">
+                            <span class="result-label">Real Power (P)</span>
+                            <span><span class="result-value" id="result-p">0</span><span class="unit">kW</span></span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Initial Reactive Power</span>
+                            <span><span class="result-value" id="result-q1">0</span><span class="unit">kVAR</span></span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Final Reactive Power</span>
+                            <span><span class="result-value" id="result-q2">0</span><span class="unit">kVAR</span></span>
+                        </div>
+
+                        <div class="result-item" style="background: #fffbea; padding: 12px; border-radius: 5px; margin: 10px -12px -12px -12px;">
+                            <span class="result-label">⭐ Required Capacitive Power</span>
+                            <span><span class="result-value" id="result-qc">0</span><span class="unit">kVAR</span></span>
+                        </div>
+                    </div>
+
+                    <div class="result-section" style="margin-top: 20px;">
+                        <div class="result-item">
+                            <span class="result-label">Total Capacitance (3-phase)</span>
+                            <span><span class="result-value" id="result-c-total">0</span><span class="unit">µF</span></span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Per-Phase Capacitance</span>
+                            <span><span class="result-value" id="result-c-phase">0</span><span class="unit">µF</span></span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Phase Voltage Used</span>
+                            <span><span class="result-value" id="result-v-phase">0</span><span class="unit">V</span></span>
+                        </div>
+                    </div>
+
+                    <div class="result-section" style="margin-top: 20px; background: #f0fff4; border-left-color: #28a745;">
+                        <div class="result-item">
+                            <span class="result-label">📦 Recommended Commercial Unit</span>
+                            <span><span class="result-value" id="result-commercial">0</span><span class="unit">kVAR</span></span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Per Unit @ 230V</span>
+                            <span><span class="result-value" id="result-per-unit">0</span><span class="unit">kVAR</span></span>
+                        </div>
+
+                        <div class="result-item">
+                            <span class="result-label">Number of Units</span>
+                            <span><span class="result-value" id="result-num-units">3</span><span class="unit">units</span></span>
+                        </div>
+                    </div>
+
+                    <div class="success" id="success-message" style="display: none;"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Power Triangle Visualization -->
+        <div class="card full-width">
+            <h2>📐 Power Triangle Visualization</h2>
+            <div class="power-triangle">
+                <canvas id="powerTriangle"></canvas>
+            </div>
+        </div>
+
+        <!-- Summary Boxes -->
+        <div id="summary-boxes" style="display: none;">
+            <div class="installation-guide">
+                <div class="summary-grid">
+                    <div class="summary-box">
+                        <div class="label">Initial Power Factor</div>
+                        <div class="value" id="summary-pf-initial">0.80</div>
+                    </div>
+                    <div class="summary-box">
+                        <div class="label">Target Power Factor</div>
+                        <div class="value" id="summary-pf-target">0.90</div>
+                    </div>
+                    <div class="summary-box">
+                        <div class="label">Required Capacitor Bank</div>
+                        <div class="value" id="summary-qc">100 kVAR</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Installation Guide -->
+        <div class="installation-guide full-width">
+            <h2>🔧 Installation Guide (WYE Configuration)</h2>
+            
+            <div class="tabs">
+                <button class="tab-button active" onclick="switchTab('specs')">Specifications</button>
+                <button class="tab-button" onclick="switchTab('wiring')">Wiring Diagram</button>
+                <button class="tab-button" onclick="switchTab('steps')">Installation Steps</button>
+                <button class="tab-button" onclick="switchTab('checklist')">Checklist</button>
+            </div>
+
+            <div id="specs" class="tab-content active">
+                <h3>Capacitor Bank Specifications</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <p><strong>Connection Type:</strong> WYE (Y) - Star Configuration</p>
+                        <p><strong>Voltage Rating:</strong> 230V (Phase-to-Neutral)</p>
+                        <p><strong>Frequency:</strong> 50 Hz</p>
+                        <p><strong>Number of Units:</strong> 3 (one per phase)</p>
+                    </div>
+                    <div>
+                        <p><strong>Per-Phase Rating:</strong> <span id="spec-per-phase">35</span> kVAR</p>
+                        <p><strong>Total System:</strong> <span id="spec-total">100</span> kVAR</p>
+                        <p><strong>Capacitance:</strong> <span id="spec-capacitance">2,131</span> µF per unit</p>
+                        <p><strong>Circuit Breaker:</strong> 150A per phase</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="wiring" class="tab-content">
+                <h3>WYE (Star) Wiring Configuration</h3>
+                <pre style="background: #f5f5f5; padding: 20px; border-radius: 5px; overflow-x: auto;">
+        Phase A ──┤ Capacitor 1 ├─────┐
+                  │  35 kVAR   │     │
+                  │   @ 230V   │     │
+                                    │
+        Phase B ──┤ Capacitor 2 ├────┼─── NEUTRAL
+                  │  35 kVAR   │     │
+                  │   @ 230V   │     │
+                                    │
+        Phase C ──┤ Capacitor 3 ├─────┘
+                  │  35 kVAR   │
+                  │   @ 230V   │
+
+Each capacitor connects PHASE-TO-NEUTRAL (not phase-to-phase!)
+                </pre>
+            </div>
+
+            <div id="steps" class="tab-content">
+                <h3>Installation Steps</h3>
+                <ul class="installation-steps">
+                    <li>
+                        <div class="step-content">
+                            <strong>Safety First:</strong> Turn off main breaker and verify power is OFF with multimeter
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-content">
+                            <strong>Mount Units:</strong> Install three capacitors on wall/stand with adequate ventilation
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-content">
+                            <strong>Run Cables:</strong> Use 16-25mm² copper cable from main panel (size for 150A per phase)
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-content">
+                            <strong>Install Breakers:</strong> Mount 150A circuit breaker per phase (C-curve or B-curve)
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-content">
+                            <strong>Connect Phase A:</strong> Breaker → Contactor → CAP1(+) → Neutral
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-content">
+                            <strong>Connect Phase B:</strong> Breaker → Contactor → CAP2(+) → Neutral
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-content">
+                            <strong>Connect Phase C:</strong> Breaker → Contactor → CAP3(+) → Neutral
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-content">
+                            <strong>Add Discharge Resistor:</strong> Install 150Ω, 5W resistor across each capacitor for safety
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-content">
+                            <strong>Ground Everything:</strong> Frame ground + Neutral ground to main earth bar (R < 1Ω)
+                        </div>
+                    </li>
+                    <li>
+                        <div class="step-content">
+                            <strong>Test:</strong> Verify no short circuits (megohm test), check voltages (230V ±5%), monitor for 5 min
+                        </div>
+                    </li>
+                </ul>
+            </div>
+
+            <div id="checklist" class="tab-content">
+                <h3>Pre-Installation Checklist</h3>
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div>
+                        <h4>Equipment Needed:</h4>
+                        <label style="display: flex; align-items: center; gap: 10px; margin: 8px 0;">
+                            <input type="checkbox"> Three Capacitors (35 kVAR @ 230V each)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; margin: 8px 0;">
+                            <input type="checkbox"> Circuit Breakers (150A × 3)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; margin: 8px 0;">
+                            <input type="checkbox"> Contactors (150A, AC-4 rated)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; margin: 8px 0;">
+                            <input type="checkbox"> Copper Cable (16-25mm², sized for 150A)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; margin: 8px 0;">
+                            <input type="checkbox"> Discharge Resistors (150Ω, 5W × 3)
+                        </label>
+                    </div>
+                    <div>
+                        <h4>Before Starting:</h4>
+                        <label style="display: flex; align-items: center; gap: 10px; margin: 8px 0;">
+                            <input type="checkbox"> Main breaker is OFF
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; margin: 8px 0;">
+                            <input type="checkbox"> All connections are verified twice
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; margin: 8px 0;">
+                            <input type="checkbox"> Multimeter tested for proper function
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; margin: 8px 0;">
+                            <input type="checkbox"> Grounding is complete (R < 1Ω)
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 10px; margin: 8px 0;">
+                            <input type="checkbox"> Area is clear of tripping hazards
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer style="text-align: center; margin-top: 50px; padding: 30px 20px; background: rgba(0,0,0,0.1); border-top: 2px solid rgba(255,255,255,0.2);">
+        <p style="color: white; margin: 0;">
+            <strong>SCADA AUTOMATION</strong> - Professional Electrical Design Solutions
+        </p>
+        <p style="color: rgba(255,255,255,0.8); margin: 10px 0 0 0; font-size: 0.95em;">
+            Capacitor Bank Design Calculator v1.0 | Thailand 230/400V WYE Systems
+        </p>
+        <p style="color: rgba(255,255,255,0.7); margin: 8px 0 0 0; font-size: 0.9em;">
+            © 2025 SCADA AUTOMATION. All rights reserved.
+        </p>
+    </footer>
+
+    <script>
+        // Set canvas responsive size
+        function resizeCanvas() {
+            const canvas = document.getElementById('powerTriangle');
+            const container = canvas.parentElement;
+            
+            // Get container width
+            let width = container.clientWidth - 40; // Subtract padding
+            
+            // Set minimum and maximum widths
+            if (width < 300) width = 300;
+            if (width > 1000) width = 1000;
+            
+            // Set responsive height
+            const height = Math.max(300, width * 0.5);
+            
+            // Set canvas resolution
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Set canvas display size
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+        }
+
+        function switchMethod(methodName) {
+            // Hide all method contents
+            document.querySelectorAll('[id^="method-"]').forEach(el => el.classList.remove('active'));
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tabs .tab-button').forEach(el => el.classList.remove('active'));
+            
+            // Show selected method
+            document.getElementById(methodName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+            
+            // Clear the other input
+            if (methodName === 'method-transformer') {
+                document.getElementById('real-power-kw').value = '';
+            } else {
+                document.getElementById('pf-percent').value = '';
+            }
+            
+            // Recalculate
+            calculateCapacitors();
+        }
+
+        function calculateCapacitors() {
+            try {
+                // Get input values
+                const transformer_kva = parseFloat(document.getElementById('transformer-kva').value);
+                const system_voltage = parseInt(document.getElementById('system-voltage').value);
+                const frequency = parseInt(document.getElementById('frequency').value);
+                const current_pf = parseFloat(document.getElementById('current-pf').value);
+                const target_pf = parseFloat(document.getElementById('target-pf').value);
+
+                // Validate inputs
+                if (!transformer_kva || transformer_kva <= 0 || transformer_kva > 10000) {
+                    throw new Error("Transformer rating must be between 10 and 10,000 kVA");
+                }
+                if (current_pf <= 0.5 || current_pf >= 1) {
+                    throw new Error("Current PF must be between 0.50 and 0.99");
+                }
+                if (target_pf <= current_pf || target_pf > 1) {
+                    throw new Error("Target PF must be greater than current PF and less than 1");
+                }
+
+                // Calculate real power based on selected method
+                let P;
+                const method_transformer = document.getElementById('method-transformer').classList.contains('active');
+                const pf_percent = parseFloat(document.getElementById('pf-percent').value);
+                const real_power_input = parseFloat(document.getElementById('real-power-kw').value);
+
+                if (method_transformer) {
+                    if (!pf_percent || pf_percent < 10 || pf_percent > 100) {
+                        throw new Error("Loading percentage must be between 10% and 100%");
+                    }
+                    P = transformer_kva * (pf_percent / 100);
+                } else {
+                    if (!real_power_input || real_power_input <= 0 || real_power_input > transformer_kva * 0.99) {
+                        throw new Error("Real Power must be between 0 and " + (transformer_kva * 0.99).toFixed(0) + " kW");
+                    }
+                    P = real_power_input;
+                }
+
+                // Calculate angles
+                const phi_initial = Math.acos(current_pf);
+                const phi_target = Math.acos(target_pf);
+
+                // Calculate reactive powers
+                const Q1 = P * Math.tan(phi_initial);
+                const Q2 = P * Math.tan(phi_target);
+                const Qc = Q1 - Q2;
+
+                // Calculate phase voltage based on system voltage
+                let V_phase;
+                if (system_voltage === 400) {
+                    V_phase = 230; // 400V WYE system: Phase voltage = 400/√3 ≈ 230V
+                } else {
+                    V_phase = system_voltage; // 220V or 230V: Use the system voltage directly
+                }
+                const C_per_phase = (Qc / 3 * 1e9) / (2 * Math.PI * frequency * V_phase * V_phase);
+                const C_total = C_per_phase * 3;
+
+                // Standard commercial sizes
+                const standard_sizes = [10, 15, 20, 25, 30, 50, 75, 100, 150, 200];
+                const commercial_rating = standard_sizes.find(size => size >= Qc) || Qc.toFixed(2);
+                const per_unit = commercial_rating / 3;
+
+                // Update results
+                document.getElementById('result-p').textContent = P.toFixed(2);
+                document.getElementById('result-q1').textContent = Q1.toFixed(2);
+                document.getElementById('result-q2').textContent = Q2.toFixed(2);
+                document.getElementById('result-qc').textContent = Qc.toFixed(2);
+                document.getElementById('result-c-total').textContent = C_total.toFixed(0);
+                document.getElementById('result-c-phase').textContent = C_per_phase.toFixed(0);
+                document.getElementById('result-v-phase').textContent = V_phase;
+                document.getElementById('result-commercial').textContent = commercial_rating;
+                document.getElementById('result-per-unit').textContent = per_unit.toFixed(2);
+
+                // Update specifications
+                document.getElementById('spec-per-phase').textContent = per_unit.toFixed(2);
+                document.getElementById('spec-total').textContent = commercial_rating;
+                document.getElementById('spec-capacitance').textContent = C_per_phase.toFixed(0);
+
+                // Update summary
+                document.getElementById('summary-pf-initial').textContent = current_pf.toFixed(2);
+                document.getElementById('summary-pf-target').textContent = target_pf.toFixed(2);
+                document.getElementById('summary-qc').textContent = Qc.toFixed(2) + ' kVAR';
+
+                // Success message
+                const pf_improvement = (current_pf * 100).toFixed(1);
+                const pf_target_percent = (target_pf * 100).toFixed(1);
+                let info_text = method_transformer ? 
+                    `(Assuming ${pf_percent}% loading of ${transformer_kva} kVA transformer = ${P.toFixed(0)} kW)` :
+                    `(Using measured power: ${P.toFixed(0)} kW)`;
+                
+                document.getElementById('success-message').innerHTML = 
+                    `✅ <strong>Calculation Successful!</strong> Your system will improve from ${pf_improvement}% to ${pf_target_percent}% power factor with a ${commercial_rating} kVAR capacitor bank (3 × ${per_unit.toFixed(2)} kVAR @ 230V units). ${info_text}`;
+                document.getElementById('success-message').style.display = 'block';
+
+                // Show results
+                document.getElementById('results').style.display = 'block';
+                document.getElementById('summary-boxes').style.display = 'block';
+                document.getElementById('error-message').style.display = 'none';
+
+                // Draw power triangle with actual PF values
+                drawPowerTriangle(P, Q1, Q2, Qc, current_pf, target_pf);
+
+            } catch (error) {
+                document.getElementById('error-message').textContent = '❌ ' + error.message;
+                document.getElementById('error-message').style.display = 'block';
+                document.getElementById('results').style.display = 'none';
+                document.getElementById('summary-boxes').style.display = 'none';
+            }
+        }
+
+        function drawPowerTriangle(P, Q1, Q2, Qc, current_pf, target_pf) {
+            resizeCanvas();
+            const canvas = document.getElementById('powerTriangle');
+            const ctx = canvas.getContext('2d');
+            const padding = 60;
+            const scale = Math.min(canvas.width, canvas.height) / Math.max(P, Q1) * 0.7;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.font = '14px Arial';
+
+            // Helper function to draw triangle
+            function drawTriangle(startX, Q, color, label) {
+                const x1 = startX;
+                const y1 = canvas.height - padding;
+                const x2 = x1 + P * scale;
+                const y2 = canvas.height - padding;
+                const x3 = x2;
+                const y3 = y2 - Q * scale;
+
+                // Draw triangle
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.fillStyle = color + '22';
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);
+                ctx.lineTo(x2, y2);
+                ctx.lineTo(x3, y3);
+                ctx.closePath();
+                ctx.fill();
+                ctx.stroke();
+
+                // Draw labels
+                ctx.fillStyle = color;
+                ctx.textAlign = 'center';
+                ctx.fillText(`${label}`, x1 + P * scale / 2, y1 + 25);
+
+                ctx.textAlign = 'right';
+                ctx.fillText(`Q: ${Q.toFixed(0)} kVAR`, x2 + 20, y3 - Q * scale / 2);
+
+                ctx.textAlign = 'center';
+                ctx.fillText(`P: ${P.toFixed(0)} kW`, x1 + P * scale / 2, y1 - 10);
+            }
+
+            // Draw BEFORE triangle
+            drawTriangle(padding, Q1, '#ff6b6b', `BEFORE (PF = ${current_pf.toFixed(2)})`);
+
+            // Draw AFTER triangle
+            drawTriangle(padding + P * scale + 150, Q2, '#51cf66', `AFTER (PF = ${target_pf.toFixed(2)})`);
+
+            // Draw capacitor annotation
+            ctx.fillStyle = '#4c6ef5';
+            ctx.font = 'bold 16px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`Qc = ${Qc.toFixed(0)} kVAR`, canvas.width / 2, 40);
+            ctx.font = '14px Arial';
+            ctx.fillStyle = '#666';
+            ctx.fillText('(Capacitive Reactive Power Needed)', canvas.width / 2, 65);
+        }
+
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+            
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(el => el.classList.remove('active'));
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Calculate on page load
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            calculateCapacitors();
+        });
+
+        // Handle window resize
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('powerTriangle');
+            if (canvas.style.display !== 'none') {
+                resizeCanvas();
+                calculateCapacitors();
+            }
+        });
+
+        // Recalculate on input change
+        document.querySelectorAll('input, select').forEach(el => {
+            el.addEventListener('change', calculateCapacitors);
+        });
+    </script>
+</body>
+</html>
